@@ -2,7 +2,7 @@ import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
  
-path = r'C:\Users\Juan\Documents\GitHub\PID\Cartas BD\9_corazones.jpg'
+path = r'C:\Users\Juan\Documents\GitHub\PID\Cartas BD\4_corazones.jpg'
 path2 = r'C:\Users\Juan\Documents\GitHub\PID\Cartas BD\Recortadas_BD\9_corazones.jpg'
 
 
@@ -16,6 +16,7 @@ sift = cv.SIFT_create()
 kp1, des1 = sift.detectAndCompute(img1,None)
 kp2, des2 = sift.detectAndCompute(img2,None)
  
+print(kp1)
 # BFMatcher with default params
 bf = cv.BFMatcher()
 matches = bf.knnMatch(des1,des2,k=2)
@@ -29,4 +30,4 @@ for m,n in matches:
 # cv.drawMatchesKnn expects list of lists as matches.
 img3 = cv.drawMatchesKnn(img1,kp1,img2,kp2,good,None,flags=cv.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
  
-plt.imshow(img3),plt.show()
+#plt.imshow(img3),plt.show()
