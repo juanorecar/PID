@@ -12,19 +12,30 @@ sift = cv2.SIFT_create()
 kp1, des1 = sift.detectAndCompute(img, None)
 kp2, des2 = sift.detectAndCompute(template, None)
 
-# Inicializar el matcher
-bf = cv2.BFMatcher(cv2.NORM_L2, crossCheck=True)
+# Obtener las coordenadas de los keypoints
+keypoint_coords = np.array([kp.pt for kp in kp1], dtype=np.float32)
 
-# Realizar el matching
-matches = bf.match(des1, des2)
+# Definir el número de clusters
+num_clusters = 5
 
-# Ordenar los matches por distancia
-matches = sorted(matches, key=lambda x: x.distance)
+# Aplicar el algoritmo de K-Means para agrupar los keypoints
+criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 100, 0.2)
+_, labels, centers = cv2.kmeans(keypoint_coords, num_clusters, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
 
-# Dibujar los primeros 10 matches
-img3 = cv2.drawMatches(img, kp1, template, kp2, matches[:10], None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+# Convertir los centros de los clusters a enteros
+centers = np.int0(centers)
 
-# Mostrar la imagen
-cv2.imshow('Matches', img3)
+# Encontrar el centroide más cercano al centro de la imagen
+center_of_image = (img.shape[1] // 2, img.shape[0] // 2)
+closest_center_idx = np.argmin(np.linalg.norm(centers - center_of_image, axis=1))
+
+# Obtener las coordenadas del centroide más cercano
+max_cluster_center = centers[closest_center_idx]
+
+# Dibujar un círculo en la imagen original para resaltar la zona de mayor densidad
+img_with_circle = cv2.circle(img.copy(), (max_cluster_center[0], max_cluster_center[1]), 50, (255, 0, 0), 3)
+
+# Mostrar la imagen con el círculo
+cv2.imshow('Image with Max Density Area', img_with_circle)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
